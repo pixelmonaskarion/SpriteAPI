@@ -8,6 +8,10 @@ from pygame.locals import (
     K_LEFT,
     K_RIGHT,
     K_ESCAPE,
+    K_w,
+    K_s,
+    K_a,
+    K_d,
     KEYDOWN,
     QUIT,
 )
@@ -17,7 +21,7 @@ def init():
     global font
     pygame.init()
     fontList = pygame.font.get_fonts()
-    font = pygame.font.SysFont(fontList[random.randint(0,len(fontList))],10)
+    font = pygame.font.SysFont(str(pygame.font.get_default_font), 30)
 
 def quitWithMessage(message):
     print(message)
@@ -30,6 +34,16 @@ def setScreen(x, y):
     SSizeX = x
     SSizeY = y
     return screen
+
+def getDirection(point1,point2):
+    #atan2(p1.y - p2.y, p1.x - p2.x)
+    return math.degrees(math.atan2(point1[1] - point2[1], point1[0] - point2[0]))
+
+def text(text, x, y):
+    Text = font.render(text, True,(0,0,0))
+    screen.blit(Text,
+        (x, y)
+        )
 
 def getKeys():
     return pygame.key.get_pressed()
@@ -47,6 +61,11 @@ def newImage(path):
     #print(path)
     image = pygame.image.load(path)
     return image
+
+def newFont(name, size):
+    global font
+    font = pygame.font.SysFont(name, size)
+    return font
     
 
 
@@ -58,7 +77,7 @@ class Sprite():
         self.x = x
         self.y = y
         self.color = color
-        self.image = newImage("face.png")
+        self.image = newImage("faceWithWhite.png")
     def update(self):
         pygame.draw.rect(self.screen, self.color, (self.x,self.y,self.size,self.size))
     def changePos(self,x,y):
@@ -68,7 +87,8 @@ class Sprite():
         self.image = newImage(path)
 
 class Player():
-    def __init__(self, screen, color, size, x, y, V, f):
+    def __init__(self, screen, color, size, x, y, V, f, direction=90):
+        self.direction = direction
         self.screen = screen
         self.color = color
         self.size = size
@@ -76,13 +96,13 @@ class Player():
         self.y = y
         self.textbubble = []
         self.isVelocity = V
-        self.image = newImage("face.png")
+        self.image = newImage("faceWithWhite.png")
         if self.isVelocity == True:
             self.Vx = 0
             self.Vy = 0
         self.f = f
     def update(self):
-        self.screen.blit(pygame.transform.scale(self.image, (self.size, self.size)), (self.x-(self.size/2), self.y-(self.size/2)))
+        self.screen.blit(pygame.transform.rotate(pygame.transform.scale(self.image, (self.size, self.size)), (self.direction-90)*-1), (self.x-(self.size/2), self.y-(self.size/2)))
         #pygame.draw.rect(self.screen, self.color, (self.x,self.y,self.size,self.size))
         if self.textbubble != []:
             self.textbubble.draw()
@@ -95,22 +115,22 @@ class Player():
         self.y = self.y - y
     def move(self, keys):
         if self.isVelocity == False:
-            if keys[K_RIGHT]:
+            if keys[K_RIGHT] or keys[K_d]:
                 self.changePos(10,0)
-            if keys[K_LEFT]:
+            if keys[K_LEFT] or keys[K_a]:
                 self.changePos(-10,0)
-            if keys[K_UP]:
+            if keys[K_UP] or keys[K_w]:
                 self.changePos(0,10)
-            if keys[K_DOWN]:
+            if keys[K_DOWN] or keys[K_s]:
                 self.changePos(0,-10)
         else:
-            if keys[K_RIGHT]:
+            if keys[K_RIGHT] or keys[K_d]:
                 self.Vx = self.Vx + 10
-            if keys[K_LEFT]:
+            if keys[K_LEFT] or keys[K_a]:
                 self.Vx = self.Vx - 10
-            if keys[K_UP]:
+            if keys[K_UP] or keys[K_w]:
                 self.Vy = self.Vy + 10
-            if keys[K_DOWN]:
+            if keys[K_DOWN] or keys[K_s]:
                 self.Vy = self.Vy - 10
             self.Vx = self.Vx * self.f
             self.Vy = self.Vy * self.f
@@ -125,6 +145,16 @@ class Player():
         if self.distanceFrom((thing.x, thing.y)) < (thing.size + self.size)/2:
             return True
         return False
+
+    def step(self, NumSteps):
+        hy = NumSteps
+        y = math.sin(math.radians(self.direction))*hy
+        x = math.cos(math.radians(self.direction))*hy
+        self.x = self.x - x
+        self.y = self.y - y
+        #print(self.direction)
+        #print("X: %d, Y: %d" % (x,y))
+        #print("new pos X: %d, Y: %d" % (self.x, self.y))
 
 
 
@@ -144,19 +174,15 @@ class textBubble():
         pygame.draw.circle(screen, (100,100,100), (self.sprite.x + (self.sprite.size/2) + 5, self.sprite.y - (self.sprite.size/2) - 5), 5, 3)
         pygame.draw.circle(screen, (255,255,255), (self.sprite.x + (self.sprite.size/2) + 15, self.sprite.y - (self.sprite.size/2) -20), 10)
         pygame.draw.circle(screen, (100,100,100), (self.sprite.x + (self.sprite.size/2) + 15, self.sprite.y - (self.sprite.size/2) -20), 10, 3)
+        text = font.render(self.text, True,(0,0,0))
         fontSize = font.size(self.text)
         if fontSize[0] > fontSize[1]:
             fontSize = fontSize[0]
         else:
             fontSize = fontSize[1]
         fontSize = fontSize * 2
-        pygame.draw.circle(screen, (255,255,255), (self.sprite.x + (self.sprite.size + (fontSize/2)/2) + 30, self.sprite.y - (self.sprite.size + (fontSize/2)/2) - 30), fontSize)
-        pygame.draw.circle(screen, (100,100,100), (self.sprite.x + (self.sprite.size + (fontSize/2)/2) + 30, self.sprite.y - (self.sprite.size + (fontSize/2)/2) - 30), fontSize,10)
-        font.render(self.text, 10,(0,0,0))
-
-
-
-
-
-
-
+        #pygame.draw.circle(screen, (255,255,255), (self.sprite.x + (self.sprite.size + (fontSize/2)/2) + 30, self.sprite.y - (self.sprite.size + (fontSize/2)/2) - 30), fontSize/2)
+        #pygame.draw.circle(screen, (100,100,100), (self.sprite.x + (self.sprite.size + (fontSize/2)/2) + 30, self.sprite.y - (self.sprite.size + (fontSize/2)/2) - 30), fontSize/2,10)
+        screen.blit(text,
+        ((self.sprite.x + (self.sprite.size + (fontSize/2)/4) + 20, self.sprite.y - (self.sprite.size + (fontSize/2)/4) - 40))
+        )
