@@ -64,6 +64,7 @@ def newImage(path):
 
 def newFont(name, size):
     global font
+    pygame.font.init()
     font = pygame.font.SysFont(name, size)
     return font
     
@@ -78,6 +79,7 @@ class Sprite():
         self.y = y
         self.color = color
         self.image = newImage("faceWithWhite.png")
+        self.show = True
     def update(self):
         pygame.draw.rect(self.screen, self.color, (self.x,self.y,self.size,self.size))
     def changePos(self,x,y):
