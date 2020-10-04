@@ -42,6 +42,9 @@
 #   setImage(path)
 #   does nothing because no image is being drawn
 #
+#   clickedByMouse()
+#   checks if the sprite is being clicked by the mouse
+#
 #Player class
 #takes screen, color, size, x, y, V, f, direction(optional)
 #screen is made with setScreen
@@ -79,6 +82,8 @@
 #   NumSteps is the number of pixels you are moving
 #   moves according to direction
 #
+#   clickedByMouse()
+#   same as the one in the sprite class
 #run()
 #run this each tick so you can quit the window without stopping the program
 #
