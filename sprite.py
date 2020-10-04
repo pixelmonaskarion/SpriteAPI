@@ -1,3 +1,90 @@
+# init()
+#call it at the begining
+#
+#setScreen(x, y)
+#creates a screen
+#used for screen = setScreen(1440, 670) thats my computer pixel dimontions 
+#
+#text(message, x ,y)
+#puts text on the screen
+#
+#getKeys():
+#returns the keys being pressed
+#used with the move function in player
+#
+#newColor(rgb)
+#rgb is a tuple, it has 3 indexes r, g, b
+#returns a pygame color
+#
+#setBackground(background)
+#background is tuple same as rgb or an image
+#
+#newImage(path)
+#returns a pygame image source file is path
+#
+#newFont(path, size)
+#returns a pygame font and creates it in this file to so you can use it later 
+#you can find font paths by running pygame.font.get_fonts() or pygame.font.get_default_font()
+#
+#Sprite class 
+#takes a screen, color, size, x and y
+#screen is made with setScreen
+#color is made with newColor
+#size is number of pixels for width and hight
+#
+#   update()
+#   draws a rectangle at sprites x and y
+#   
+#   changePos(x,y)
+#   adds to the position
+#   positive y goes up on the screen not down because that make much more sense
+#
+#   setImage(path)
+#   does nothing because no image is being drawn
+#
+#Player class
+#takes screen, color, size, x, y, V, f, direction(optional)
+#screen is made with setScreen
+#color is made with newColor but is not used
+#size is number of pixels for width and hight changes image to be that size
+#V is is there is velocity when calling move
+#f is friction when calling move (used only when V is True)
+#direction is used when calling step image is also changed to point in that direction
+#
+#   update()
+#   draws image onto screen
+#
+#   say(text)beta
+#   creates a textbubble
+#
+#   changePos(x,y)
+#   adds to the position
+#   positive y goes up on the screen not down because that make much more sense
+#
+#   move(keys)
+#   keys is set with getKeys()
+#   moves player according to the arrow keys or WASD
+#
+#   setImage(path)
+#   calls newimage(path) and sets its own image to the returned value
+#
+#   distanceFrom(point)
+#   returns the distance to the point
+#
+#   touching(thing)
+#   thing is a sprite or player
+#   the 2 sprites have circle hitboxes according to there size
+#
+#   step(NumSteps)
+#   NumSteps is the number of pixels you are moving
+#   moves according to direction
+#
+#run()
+#run this each tick so you can quit the window without stopping the program
+#
+#THE END :/
+
+
 import pygame
 import random
 import math
@@ -16,12 +103,12 @@ from pygame.locals import (
     QUIT,
 )
 
-def init():
+def init(size=30):
     global fontList
     global font
     pygame.init()
     fontList = pygame.font.get_fonts()
-    font = pygame.font.SysFont(str(pygame.font.get_default_font), 30)
+    font = pygame.font.SysFont(str(pygame.font.get_default_font), size)
 
 def quitWithMessage(message):
     print(message)
@@ -87,6 +174,19 @@ class Sprite():
         self.y = self.y - y
     def setImage(self,path):
         self.image = newImage(path)
+    def clickedByMouse(self, margin=3):
+        Mx, My = pygame.mouse.get_pos()
+        minX = round(self.x - (self.size/2)) - margin
+        minY = round(self.y - (self.size/2)) - margin
+        maxX = round(self.x + (self.size/2)) + margin
+        maxY = round(self.y + (self.size/2)) + margin
+        #drawSquare()
+        if pygame.mouse.get_pressed()[0] == 1:
+            if Mx >= minX and Mx <= maxX:
+                if My >= minY and My <= maxY:
+                    return True
+            return False
+            
 
 class Player():
     def __init__(self, screen, color, size, x, y, V, f, direction=90):
@@ -157,6 +257,19 @@ class Player():
         #print(self.direction)
         #print("X: %d, Y: %d" % (x,y))
         #print("new pos X: %d, Y: %d" % (self.x, self.y))
+
+    def clickedByMouse(self):
+        if pygame.mouse.get_pressed()[0] == 1:
+            Mx, My = pygame.mouse.get_pos()
+            minX = round(self.x - (self.size/2))
+            minY = round(self.y - (self.size/2))
+            maxX = round(self.x + (self.size/2))
+            maxY = round(self.y + (self.size/2))
+            if Mx >= minX and Mx <= maxX:
+                return True
+            if My >= minY and My <= maxY:
+                return True
+            return False
 
 
 
