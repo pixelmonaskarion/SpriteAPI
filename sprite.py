@@ -42,9 +42,6 @@
 #   setImage(path)
 #   does nothing because no image is being drawn
 #
-#   clickedByMouse()
-#   checks if the sprite is being clicked by the mouse
-#
 #Player class
 #takes screen, color, size, x, y, V, f, direction(optional)
 #screen is made with setScreen
@@ -82,8 +79,6 @@
 #   NumSteps is the number of pixels you are moving
 #   moves according to direction
 #
-#   clickedByMouse()
-#   same as the one in the sprite class
 #run()
 #run this each tick so you can quit the window without stopping the program
 #
@@ -108,12 +103,12 @@ from pygame.locals import (
     QUIT,
 )
 
-def init(size=30):
+def init(size=30, inputFont=str(pygame.font.get_default_font)):
     global fontList
     global font
     pygame.init()
     fontList = pygame.font.get_fonts()
-    font = pygame.font.SysFont(str(pygame.font.get_default_font), size)
+    font = pygame.font.SysFont(inputFont, size)
 
 def quitWithMessage(message):
     print(message)
@@ -174,6 +169,8 @@ class Sprite():
         self.show = True
     def update(self):
         pygame.draw.rect(self.screen, self.color, (self.x,self.y,self.size,self.size))
+    def updateImage(self):
+        self.screen.blit(pygame.transform.rotate(pygame.transform.scale(self.image, (self.size, self.size)), 0), (self.x-(self.size/2), self.y-(self.size/2)))
     def changePos(self,x,y):
         self.x = self.x + x
         self.y = self.y - y
@@ -190,7 +187,7 @@ class Sprite():
             if Mx >= minX and Mx <= maxX:
                 if My >= minY and My <= maxY:
                     return True
-            return False
+        return False
             
 
 class Player():
@@ -223,13 +220,13 @@ class Player():
     def move(self, keys):
         if self.isVelocity == False:
             if keys[K_RIGHT] or keys[K_d]:
-                self.changePos(10,0)
+                self.changePos(self.f,0)
             if keys[K_LEFT] or keys[K_a]:
-                self.changePos(-10,0)
+                self.changePos(self.f*-1,0)
             if keys[K_UP] or keys[K_w]:
-                self.changePos(0,10)
+                self.changePos(0,self.f)
             if keys[K_DOWN] or keys[K_s]:
-                self.changePos(0,-10)
+                self.changePos(0,self.f*-1)
         else:
             if keys[K_RIGHT] or keys[K_d]:
                 self.Vx = self.Vx + 10
@@ -271,10 +268,9 @@ class Player():
             maxX = round(self.x + (self.size/2))
             maxY = round(self.y + (self.size/2))
             if Mx >= minX and Mx <= maxX:
-                return True
-            if My >= minY and My <= maxY:
-                return True
-            return False
+                if My >= minY and My <= maxY:
+                    return True
+        return False
 
 
 
